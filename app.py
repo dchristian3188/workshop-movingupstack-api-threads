@@ -20,9 +20,39 @@ db_passwd = os.environ.get('DB_PASSWORD', 'myAwesomePassword')
 db_name = os.environ.get('DATABASE', 'mydb')
 
 
+def create_db():
+    mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        password=db_passwd
+    )
+
+    mycursor = mydb.cursor()
+    mycursor.execute(f"CREATE DATABASE IF NOT EXISTS `mydb`;")
+    mycursor.execute("""
+        USE `mydb`;
+        CREATE TABLE IF NOT EXISTS `threads` (
+            `id` int NOT NULL,
+            `title` varchar(50) NOT NULL,
+            `createdBy` int NOT NULL,
+            PRIMARY KEY (`id`)
+            );
+
+        insert  into `threads`(`id`,`title`,`createdBy`) values
+            (1,'What''s up with the Lich?',1);
+            """ )
+            
 conn = None
 if not local_db:
-    conn = mysql.connector.connect(host=db_host, user=db_user, passwd=db_passwd, database=db_name)
+    try:
+        conn = mysql.connector.connect(host=db_host, user=db_user, passwd=db_passwd, database=db_name)
+    except:
+        try:
+            create_db()
+            conn = mysql.connector.connect(host=db_host, user=db_user, passwd=db_passwd, database=db_name)
+        except:
+            print("Unable to create database to MySQl")
+        print("unable to connect to MySQL")
 
 
 def get_from_db(table):
@@ -59,7 +89,7 @@ def threads():
     
 
 
-@app.route('/api/clear-cache', methods=['GET'], strict_slashes=False)
+@app.route('/api/threads/clear-cache', methods=['GET'], strict_slashes=False)
 def clear_cache():
     red.delete("users")
     red.delete("posts")
