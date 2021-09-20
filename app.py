@@ -31,6 +31,7 @@ def create_db():
     mycursor.execute(f"CREATE DATABASE IF NOT EXISTS `mydb`;")
     mycursor.execute("""
         USE `mydb`;
+
         CREATE TABLE IF NOT EXISTS `threads` (
             `id` int NOT NULL,
             `title` varchar(50) NOT NULL,
@@ -38,20 +39,23 @@ def create_db():
             PRIMARY KEY (`id`)
             );
 
+        """,multi=True)
+            
+
+    mycursor.execute("""    
+        USE `mydb`;
+
         insert  into `threads`(`id`,`title`,`createdBy`) values
             (1,'What''s up with the Lich?',1);
-            """ )
-            
+
+        """,multi=True)
+
+create_db()
 conn = None
 if not local_db:
     try:
         conn = mysql.connector.connect(host=db_host, user=db_user, passwd=db_passwd, database=db_name)
     except:
-        try:
-            create_db()
-            conn = mysql.connector.connect(host=db_host, user=db_user, passwd=db_passwd, database=db_name)
-        except:
-            print("Unable to create database to MySQl")
         print("unable to connect to MySQL")
 
 
